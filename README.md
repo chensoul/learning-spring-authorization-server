@@ -1,4 +1,4 @@
-# learning-spring-authorization-server
+# learn-spring-authorization-server
 
 spring-authorization-server 学习笔记
 
