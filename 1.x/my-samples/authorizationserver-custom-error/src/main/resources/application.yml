@@ -1,0 +1,11 @@
+server:
+  port: 9000
+
+spring.security.oauth2.jwk.keystore-location: classpath:keystore.p12
+spring.security.oauth2.jwk.store-password: password
+
+logging:
+  level:
+    org.springframework.security: trace
+
+

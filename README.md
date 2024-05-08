@@ -14,12 +14,6 @@ spring-authorization-server 学习笔记
 keytool -genkeypair -alias authorizationserver -keyalg RSA -keysize 2048 -storetype PKCS12 -keystore keystore.p12 -storepass password -dname "CN=Web Server,OU=Unit,O=Organization,L=City,S=State,C=CN" -validity 3650
 ```
 
-导出证书文件：
-
-```bash
-keytool -exportcert -alias authorizationserver -storepass password -keystore keystore.p12 -file public.crt
-```
-
 导出公钥文件：
 
 ```bash

@@ -1,0 +1,9 @@
+server:
+  port: 9000
+
+spring.security.oauth2.jwk.rsaPublicKey: classpath:public.key
+spring.security.oauth2.jwk.rsaPrivateKey: classpath:private.key
+
+logging:
+  level:
+    org.springframework.security: debug
