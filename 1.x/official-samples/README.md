@@ -1,6 +1,7 @@
 # spring-authorization-server 1.x 官方示例
 
-spring-authorization-server 1.x 版本官方示例。代码地址：https://github.com/spring-projects/spring-authorization-server/tree/main/samples
+spring-authorization-server 1.x
+版本官方示例。代码地址：https://github.com/spring-projects/spring-authorization-server/tree/main/samples
 
 ## 说明
 
@@ -16,28 +17,27 @@ spring-authorization-server 1.x 版本官方示例。代码地址：https://gith
 
 ```bash
 cd demo-authorizationserver 
-./gradlew bootRun
+mvn sprint-boot:run
 ```
 
 启动 Client：
 
 ```bash
 cd demo-client 
-./gradlew bootRun
+mvn sprint-boot:run
 ```
 
 启动资源服务：
 
 ```bash
 cd messages-resource
-./gradlew bootRun
+mvn sprint-boot:run
 
 cd users-resource
-./gradlew bootRun
+mvn sprint-boot:run
 ```
 
 打开浏览器，访问：http://localhost:8080，输入 user1/password
-
 
 ## 参考文档
 

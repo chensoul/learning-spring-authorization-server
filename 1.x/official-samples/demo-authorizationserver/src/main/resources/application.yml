@@ -10,7 +10,7 @@ spring:
       jks:
         demo-authorizationserver:
           key:
-            alias: authorizationserver
+            alias: demo-authorizationserver-sample
             password: password
           keystore:
             location: classpath:keystore.p12

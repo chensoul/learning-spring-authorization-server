@@ -18,12 +18,24 @@ package sample.config;
 import java.util.Arrays;
 import java.util.function.Supplier;
 
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.TrustManagerFactory;
+
+import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslContextBuilder;
+import reactor.netty.http.client.HttpClient;
+import reactor.netty.tcp.SslProvider;
 import sample.authorization.DeviceCodeOAuth2AuthorizedClientProvider;
 
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.ssl.SslBundle;
+import org.springframework.boot.ssl.SslBundles;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.reactive.ClientHttpConnector;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProvider;
@@ -52,12 +64,57 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Configuration(proxyBeanMethods = false)
 public class WebClientConfig {
 
-	@Bean
-	public WebClient webClient(OAuth2AuthorizedClientManager authorizedClientManager) {
+	@Bean("default-client-web-client")
+	public WebClient defaultClientWebClient(
+			OAuth2AuthorizedClientManager authorizedClientManager,
+			SslBundles sslBundles) throws Exception {
+
 		ServletOAuth2AuthorizedClientExchangeFilterFunction oauth2Client =
 				new ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager);
 		// @formatter:off
 		return WebClient.builder()
+				.clientConnector(createClientConnector(sslBundles.getBundle("demo-client")))
+				.apply(oauth2Client.oauth2Configuration())
+				.build();
+		// @formatter:on
+	}
+
+	@Bean("self-signed-demo-client-web-client")
+	public WebClient selfSignedDemoClientWebClient(
+			ClientRegistrationRepository clientRegistrationRepository,
+			OAuth2AuthorizedClientRepository authorizedClientRepository,
+			RestTemplateBuilder restTemplateBuilder,
+			@Qualifier("self-signed-demo-client-http-request-factory") Supplier<ClientHttpRequestFactory> clientHttpRequestFactory,
+			SslBundles sslBundles) throws Exception {
+
+		// @formatter:off
+		RestTemplate restTemplate = restTemplateBuilder
+				.requestFactory(clientHttpRequestFactory)
+				.messageConverters(Arrays.asList(
+						new FormHttpMessageConverter(),
+						new OAuth2AccessTokenResponseHttpMessageConverter()))
+				.errorHandler(new OAuth2ErrorResponseErrorHandler())
+				.build();
+		// @formatter:on
+
+		// @formatter:off
+		OAuth2AuthorizedClientProvider authorizedClientProvider =
+				OAuth2AuthorizedClientProviderBuilder.builder()
+						.clientCredentials(clientCredentials ->
+								clientCredentials.accessTokenResponseClient(
+										createClientCredentialsTokenResponseClient(restTemplate)))
+						.build();
+		// @formatter:on
+
+		DefaultOAuth2AuthorizedClientManager authorizedClientManager = new DefaultOAuth2AuthorizedClientManager(
+				clientRegistrationRepository, authorizedClientRepository);
+		authorizedClientManager.setAuthorizedClientProvider(authorizedClientProvider);
+
+		ServletOAuth2AuthorizedClientExchangeFilterFunction oauth2Client =
+				new ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager);
+		// @formatter:off
+		return WebClient.builder()
+				.clientConnector(createClientConnector(sslBundles.getBundle("self-signed-demo-client")))
 				.apply(oauth2Client.oauth2Configuration())
 				.build();
 		// @formatter:on
@@ -68,7 +125,7 @@ public class WebClientConfig {
 			ClientRegistrationRepository clientRegistrationRepository,
 			OAuth2AuthorizedClientRepository authorizedClientRepository,
 			RestTemplateBuilder restTemplateBuilder,
-			Supplier<ClientHttpRequestFactory> clientHttpRequestFactory) {
+			@Qualifier("default-client-http-request-factory") Supplier<ClientHttpRequestFactory> clientHttpRequestFactory) {
 
 		// @formatter:off
 		RestTemplate restTemplate = restTemplateBuilder
@@ -101,6 +158,22 @@ public class WebClientConfig {
 				.deviceCodeContextAttributesMapper());
 
 		return authorizedClientManager;
+	}
+
+	private static ClientHttpConnector createClientConnector(SslBundle sslBundle) throws Exception {
+		KeyManagerFactory keyManagerFactory = sslBundle.getManagers().getKeyManagerFactory();
+		TrustManagerFactory trustManagerFactory = sslBundle.getManagers().getTrustManagerFactory();
+
+		// @formatter:off
+		SslContext sslContext = SslContextBuilder.forClient()
+				.keyManager(keyManagerFactory)
+				.trustManager(trustManagerFactory)
+				.build();
+		// @formatter:on
+
+		SslProvider sslProvider = SslProvider.builder().sslContext(sslContext).build();
+		HttpClient httpClient = HttpClient.create().secure(sslProvider);
+		return new ReactorClientHttpConnector(httpClient);
 	}
 
 	private static OAuth2AccessTokenResponseClient<OAuth2ClientCredentialsGrantRequest> createClientCredentialsTokenResponseClient(
