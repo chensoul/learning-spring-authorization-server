@@ -44,11 +44,23 @@ import org.springframework.util.Assert;
 public final class DeviceCodeOAuth2AuthorizedClientProvider implements OAuth2AuthorizedClientProvider {
 
 	private OAuth2AccessTokenResponseClient<OAuth2DeviceGrantRequest> accessTokenResponseClient =
-			new OAuth2DeviceAccessTokenResponseClient();
+		new OAuth2DeviceAccessTokenResponseClient();
 
 	private Duration clockSkew = Duration.ofSeconds(60);
 
 	private Clock clock = Clock.systemUTC();
+
+	public static Function<OAuth2AuthorizeRequest, Map<String, Object>> deviceCodeContextAttributesMapper() {
+		return (authorizeRequest) -> {
+			HttpServletRequest request = authorizeRequest.getAttribute(HttpServletRequest.class.getName());
+			Assert.notNull(request, "request cannot be null");
+
+			// Obtain device code from request
+			String deviceCode = request.getParameter(OAuth2ParameterNames.DEVICE_CODE);
+			return (deviceCode != null) ? Collections.singletonMap(OAuth2ParameterNames.DEVICE_CODE, deviceCode) :
+				Collections.emptyMap();
+		};
+	}
 
 	public void setAccessTokenResponseClient(OAuth2AccessTokenResponseClient<OAuth2DeviceGrantRequest> accessTokenResponseClient) {
 		this.accessTokenResponseClient = accessTokenResponseClient;
@@ -88,11 +100,11 @@ public final class DeviceCodeOAuth2AuthorizedClientProvider implements OAuth2Aut
 		OAuth2DeviceGrantRequest deviceGrantRequest = new OAuth2DeviceGrantRequest(clientRegistration, deviceCode);
 		OAuth2AccessTokenResponse tokenResponse = getTokenResponse(clientRegistration, deviceGrantRequest);
 		return new OAuth2AuthorizedClient(clientRegistration, context.getPrincipal().getName(),
-				tokenResponse.getAccessToken(), tokenResponse.getRefreshToken());
+			tokenResponse.getAccessToken(), tokenResponse.getRefreshToken());
 	}
 
 	private OAuth2AccessTokenResponse getTokenResponse(ClientRegistration clientRegistration,
-			OAuth2DeviceGrantRequest deviceGrantRequest) {
+													   OAuth2DeviceGrantRequest deviceGrantRequest) {
 		try {
 			return this.accessTokenResponseClient.getTokenResponse(deviceGrantRequest);
 		} catch (OAuth2AuthorizationException ex) {
@@ -102,18 +114,6 @@ public final class DeviceCodeOAuth2AuthorizedClientProvider implements OAuth2Aut
 
 	private boolean hasTokenExpired(OAuth2Token token) {
 		return this.clock.instant().isAfter(token.getExpiresAt().minus(this.clockSkew));
-	}
-
-	public static Function<OAuth2AuthorizeRequest, Map<String, Object>> deviceCodeContextAttributesMapper() {
-		return (authorizeRequest) -> {
-			HttpServletRequest request = authorizeRequest.getAttribute(HttpServletRequest.class.getName());
-			Assert.notNull(request, "request cannot be null");
-
-			// Obtain device code from request
-			String deviceCode = request.getParameter(OAuth2ParameterNames.DEVICE_CODE);
-			return (deviceCode != null) ? Collections.singletonMap(OAuth2ParameterNames.DEVICE_CODE, deviceCode) :
-					Collections.emptyMap();
-		};
 	}
 
 }

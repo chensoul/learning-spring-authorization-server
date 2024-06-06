@@ -1,4 +1,4 @@
-package com.chensoul.socialloginclient;
+package com.chensoul.oauthclient;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -6,10 +6,10 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 
 @EnableMethodSecurity
 @SpringBootApplication
-public class SocialLoginClientApplication {
+public class OAuthClientApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(SocialLoginClientApplication.class, args);
+		SpringApplication.run(OAuthClientApplication.class, args);
 	}
 
 }

@@ -70,8 +70,8 @@ public class AuthorizationServerConfig {
 	@Bean
 	@Order(Ordered.HIGHEST_PRECEDENCE)
 	public SecurityFilterChain authorizationServerSecurityFilterChain(
-			HttpSecurity http, RegisteredClientRepository registeredClientRepository,
-			AuthorizationServerSettings authorizationServerSettings) throws Exception {
+		HttpSecurity http, RegisteredClientRepository registeredClientRepository,
+		AuthorizationServerSettings authorizationServerSettings) throws Exception {
 
 		OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
 
@@ -92,10 +92,10 @@ public class AuthorizationServerConfig {
 		 * outside the scope of this sample.
 		 */
 		DeviceClientAuthenticationConverter deviceClientAuthenticationConverter =
-				new DeviceClientAuthenticationConverter(
-						authorizationServerSettings.getDeviceAuthorizationEndpoint());
+			new DeviceClientAuthenticationConverter(
+				authorizationServerSettings.getDeviceAuthorizationEndpoint());
 		DeviceClientAuthenticationProvider deviceClientAuthenticationProvider =
-				new DeviceClientAuthenticationProvider(registeredClientRepository);
+			new DeviceClientAuthenticationProvider(registeredClientRepository);
 
 		// @formatter:off
 		http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
@@ -201,13 +201,13 @@ public class AuthorizationServerConfig {
 
 	@Bean
 	public JdbcOAuth2AuthorizationService authorizationService(JdbcTemplate jdbcTemplate,
-			RegisteredClientRepository registeredClientRepository) {
+															   RegisteredClientRepository registeredClientRepository) {
 		return new JdbcOAuth2AuthorizationService(jdbcTemplate, registeredClientRepository);
 	}
 
 	@Bean
 	public JdbcOAuth2AuthorizationConsentService authorizationConsentService(JdbcTemplate jdbcTemplate,
-			RegisteredClientRepository registeredClientRepository) {
+																			 RegisteredClientRepository registeredClientRepository) {
 		// Will be used by the ConsentController
 		return new JdbcOAuth2AuthorizationConsentService(jdbcTemplate, registeredClientRepository);
 	}

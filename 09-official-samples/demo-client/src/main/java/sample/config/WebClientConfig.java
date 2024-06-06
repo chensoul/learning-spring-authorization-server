@@ -64,13 +64,48 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Configuration(proxyBeanMethods = false)
 public class WebClientConfig {
 
+	private static ClientHttpConnector createClientConnector(SslBundle sslBundle) throws Exception {
+		KeyManagerFactory keyManagerFactory = sslBundle.getManagers().getKeyManagerFactory();
+		TrustManagerFactory trustManagerFactory = sslBundle.getManagers().getTrustManagerFactory();
+
+		// @formatter:off
+		SslContext sslContext = SslContextBuilder.forClient()
+				.keyManager(keyManagerFactory)
+				.trustManager(trustManagerFactory)
+				.build();
+		// @formatter:on
+
+		SslProvider sslProvider = SslProvider.builder().sslContext(sslContext).build();
+		HttpClient httpClient = HttpClient.create().secure(sslProvider);
+		return new ReactorClientHttpConnector(httpClient);
+	}
+
+	private static OAuth2AccessTokenResponseClient<OAuth2ClientCredentialsGrantRequest> createClientCredentialsTokenResponseClient(
+		RestTemplate restTemplate) {
+		DefaultClientCredentialsTokenResponseClient clientCredentialsTokenResponseClient =
+			new DefaultClientCredentialsTokenResponseClient();
+		clientCredentialsTokenResponseClient.setRestOperations(restTemplate);
+
+		OAuth2ClientCredentialsGrantRequestEntityConverter clientCredentialsGrantRequestEntityConverter =
+			new OAuth2ClientCredentialsGrantRequestEntityConverter();
+		clientCredentialsGrantRequestEntityConverter.addParametersConverter(authorizationGrantRequest -> {
+			MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
+			// client_id parameter is required for tls_client_auth method
+			parameters.add(OAuth2ParameterNames.CLIENT_ID, authorizationGrantRequest.getClientRegistration().getClientId());
+			return parameters;
+		});
+		clientCredentialsTokenResponseClient.setRequestEntityConverter(clientCredentialsGrantRequestEntityConverter);
+
+		return clientCredentialsTokenResponseClient;
+	}
+
 	@Bean("default-client-web-client")
 	public WebClient defaultClientWebClient(
-			OAuth2AuthorizedClientManager authorizedClientManager,
-			SslBundles sslBundles) throws Exception {
+		OAuth2AuthorizedClientManager authorizedClientManager,
+		SslBundles sslBundles) throws Exception {
 
 		ServletOAuth2AuthorizedClientExchangeFilterFunction oauth2Client =
-				new ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager);
+			new ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager);
 		// @formatter:off
 		return WebClient.builder()
 				.clientConnector(createClientConnector(sslBundles.getBundle("demo-client")))
@@ -81,11 +116,11 @@ public class WebClientConfig {
 
 	@Bean("self-signed-demo-client-web-client")
 	public WebClient selfSignedDemoClientWebClient(
-			ClientRegistrationRepository clientRegistrationRepository,
-			OAuth2AuthorizedClientRepository authorizedClientRepository,
-			RestTemplateBuilder restTemplateBuilder,
-			@Qualifier("self-signed-demo-client-http-request-factory") Supplier<ClientHttpRequestFactory> clientHttpRequestFactory,
-			SslBundles sslBundles) throws Exception {
+		ClientRegistrationRepository clientRegistrationRepository,
+		OAuth2AuthorizedClientRepository authorizedClientRepository,
+		RestTemplateBuilder restTemplateBuilder,
+		@Qualifier("self-signed-demo-client-http-request-factory") Supplier<ClientHttpRequestFactory> clientHttpRequestFactory,
+		SslBundles sslBundles) throws Exception {
 
 		// @formatter:off
 		RestTemplate restTemplate = restTemplateBuilder
@@ -107,11 +142,11 @@ public class WebClientConfig {
 		// @formatter:on
 
 		DefaultOAuth2AuthorizedClientManager authorizedClientManager = new DefaultOAuth2AuthorizedClientManager(
-				clientRegistrationRepository, authorizedClientRepository);
+			clientRegistrationRepository, authorizedClientRepository);
 		authorizedClientManager.setAuthorizedClientProvider(authorizedClientProvider);
 
 		ServletOAuth2AuthorizedClientExchangeFilterFunction oauth2Client =
-				new ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager);
+			new ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager);
 		// @formatter:off
 		return WebClient.builder()
 				.clientConnector(createClientConnector(sslBundles.getBundle("self-signed-demo-client")))
@@ -122,10 +157,10 @@ public class WebClientConfig {
 
 	@Bean
 	public OAuth2AuthorizedClientManager authorizedClientManager(
-			ClientRegistrationRepository clientRegistrationRepository,
-			OAuth2AuthorizedClientRepository authorizedClientRepository,
-			RestTemplateBuilder restTemplateBuilder,
-			@Qualifier("default-client-http-request-factory") Supplier<ClientHttpRequestFactory> clientHttpRequestFactory) {
+		ClientRegistrationRepository clientRegistrationRepository,
+		OAuth2AuthorizedClientRepository authorizedClientRepository,
+		RestTemplateBuilder restTemplateBuilder,
+		@Qualifier("default-client-http-request-factory") Supplier<ClientHttpRequestFactory> clientHttpRequestFactory) {
 
 		// @formatter:off
 		RestTemplate restTemplate = restTemplateBuilder
@@ -150,49 +185,14 @@ public class WebClientConfig {
 		// @formatter:on
 
 		DefaultOAuth2AuthorizedClientManager authorizedClientManager = new DefaultOAuth2AuthorizedClientManager(
-				clientRegistrationRepository, authorizedClientRepository);
+			clientRegistrationRepository, authorizedClientRepository);
 		authorizedClientManager.setAuthorizedClientProvider(authorizedClientProvider);
 
 		// Set a contextAttributesMapper to obtain device_code from the request
 		authorizedClientManager.setContextAttributesMapper(DeviceCodeOAuth2AuthorizedClientProvider
-				.deviceCodeContextAttributesMapper());
+			.deviceCodeContextAttributesMapper());
 
 		return authorizedClientManager;
-	}
-
-	private static ClientHttpConnector createClientConnector(SslBundle sslBundle) throws Exception {
-		KeyManagerFactory keyManagerFactory = sslBundle.getManagers().getKeyManagerFactory();
-		TrustManagerFactory trustManagerFactory = sslBundle.getManagers().getTrustManagerFactory();
-
-		// @formatter:off
-		SslContext sslContext = SslContextBuilder.forClient()
-				.keyManager(keyManagerFactory)
-				.trustManager(trustManagerFactory)
-				.build();
-		// @formatter:on
-
-		SslProvider sslProvider = SslProvider.builder().sslContext(sslContext).build();
-		HttpClient httpClient = HttpClient.create().secure(sslProvider);
-		return new ReactorClientHttpConnector(httpClient);
-	}
-
-	private static OAuth2AccessTokenResponseClient<OAuth2ClientCredentialsGrantRequest> createClientCredentialsTokenResponseClient(
-			RestTemplate restTemplate) {
-		DefaultClientCredentialsTokenResponseClient clientCredentialsTokenResponseClient =
-				new DefaultClientCredentialsTokenResponseClient();
-		clientCredentialsTokenResponseClient.setRestOperations(restTemplate);
-
-		OAuth2ClientCredentialsGrantRequestEntityConverter clientCredentialsGrantRequestEntityConverter =
-				new OAuth2ClientCredentialsGrantRequestEntityConverter();
-		clientCredentialsGrantRequestEntityConverter.addParametersConverter(authorizationGrantRequest -> {
-			MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
-			// client_id parameter is required for tls_client_auth method
-			parameters.add(OAuth2ParameterNames.CLIENT_ID, authorizationGrantRequest.getClientRegistration().getClientId());
-			return parameters;
-		});
-		clientCredentialsTokenResponseClient.setRequestEntityConverter(clientCredentialsGrantRequestEntityConverter);
-
-		return clientCredentialsTokenResponseClient;
 	}
 
 }

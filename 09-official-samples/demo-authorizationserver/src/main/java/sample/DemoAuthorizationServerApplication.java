@@ -37,25 +37,25 @@ import org.springframework.context.annotation.ImportRuntimeHints;
 @ImportRuntimeHints(DemoAuthorizationServerApplication.DemoAuthorizationServerApplicationRuntimeHintsRegistrar.class)
 public class DemoAuthorizationServerApplication {
 
+	public static void main(String[] args) {
+		SpringApplication.run(DemoAuthorizationServerApplication.class, args);
+	}
+
 	static class DemoAuthorizationServerApplicationRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
 
 		@Override
 		public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
 			// Thymeleaf
 			hints.reflection().registerTypes(
-					Arrays.asList(
-							TypeReference.of(AuthorizationConsentController.ScopeWithDescription.class),
-							TypeReference.of(Lists.class)
-					), builder ->
-							builder.withMembers(MemberCategory.DECLARED_FIELDS,
-									MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, MemberCategory.INVOKE_DECLARED_METHODS)
+				Arrays.asList(
+					TypeReference.of(AuthorizationConsentController.ScopeWithDescription.class),
+					TypeReference.of(Lists.class)
+				), builder ->
+					builder.withMembers(MemberCategory.DECLARED_FIELDS,
+						MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, MemberCategory.INVOKE_DECLARED_METHODS)
 			);
 		}
 
-	}
-
-	public static void main(String[] args) {
-		SpringApplication.run(DemoAuthorizationServerApplication.class, args);
 	}
 
 }

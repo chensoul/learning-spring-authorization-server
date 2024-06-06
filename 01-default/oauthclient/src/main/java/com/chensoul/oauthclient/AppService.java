@@ -1,4 +1,4 @@
-package com.chensoul.socialloginclient;
+package com.chensoul.oauthclient;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;

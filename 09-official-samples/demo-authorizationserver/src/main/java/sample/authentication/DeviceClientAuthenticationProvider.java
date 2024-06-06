@@ -35,10 +35,10 @@ import org.springframework.util.Assert;
 /**
  * @author Joe Grandja
  * @author Steve Riesenberg
- * @since 1.1
  * @see DeviceClientAuthenticationToken
  * @see DeviceClientAuthenticationConverter
  * @see OAuth2ClientAuthenticationFilter
+ * @since 1.1
  */
 public final class DeviceClientAuthenticationProvider implements AuthenticationProvider {
 	private static final String ERROR_URI = "https://datatracker.ietf.org/doc/html/rfc6749#section-3.2.1";
@@ -50,10 +50,19 @@ public final class DeviceClientAuthenticationProvider implements AuthenticationP
 		this.registeredClientRepository = registeredClientRepository;
 	}
 
+	private static void throwInvalidClient(String parameterName) {
+		OAuth2Error error = new OAuth2Error(
+			OAuth2ErrorCodes.INVALID_CLIENT,
+			"Device client authentication failed: " + parameterName,
+			ERROR_URI
+		);
+		throw new OAuth2AuthenticationException(error);
+	}
+
 	@Override
 	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
 		DeviceClientAuthenticationToken deviceClientAuthentication =
-				(DeviceClientAuthenticationToken) authentication;
+			(DeviceClientAuthenticationToken) authentication;
 
 		if (!ClientAuthenticationMethod.NONE.equals(deviceClientAuthentication.getClientAuthenticationMethod())) {
 			return null;
@@ -70,7 +79,7 @@ public final class DeviceClientAuthenticationProvider implements AuthenticationP
 		}
 
 		if (!registeredClient.getClientAuthenticationMethods().contains(
-				deviceClientAuthentication.getClientAuthenticationMethod())) {
+			deviceClientAuthentication.getClientAuthenticationMethod())) {
 			throwInvalidClient("authentication_method");
 		}
 
@@ -83,21 +92,12 @@ public final class DeviceClientAuthenticationProvider implements AuthenticationP
 		}
 
 		return new DeviceClientAuthenticationToken(registeredClient,
-				deviceClientAuthentication.getClientAuthenticationMethod(), null);
+			deviceClientAuthentication.getClientAuthenticationMethod(), null);
 	}
 
 	@Override
 	public boolean supports(Class<?> authentication) {
 		return DeviceClientAuthenticationToken.class.isAssignableFrom(authentication);
-	}
-
-	private static void throwInvalidClient(String parameterName) {
-		OAuth2Error error = new OAuth2Error(
-				OAuth2ErrorCodes.INVALID_CLIENT,
-				"Device client authentication failed: " + parameterName,
-				ERROR_URI
-		);
-		throw new OAuth2AuthenticationException(error);
 	}
 
 }

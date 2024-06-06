@@ -43,30 +43,13 @@ public class TokenExchangeConfig {
 
 	private static final String IMPERSONATION_CLIENT_REGISTRATION_ID = "messaging-client-token-exchange-with-impersonation";
 
-	@Bean
-	public OAuth2AuthorizedClientProvider tokenExchange(
-			ClientRegistrationRepository clientRegistrationRepository,
-			OAuth2AuthorizedClientService authorizedClientService) {
-
-		OAuth2AuthorizedClientManager authorizedClientManager = tokenExchangeAuthorizedClientManager(
-				clientRegistrationRepository, authorizedClientService);
-		Function<OAuth2AuthorizationContext, OAuth2Token> actorTokenResolver = createTokenResolver(
-				authorizedClientManager, ACTOR_TOKEN_CLIENT_REGISTRATION_ID);
-
-		TokenExchangeOAuth2AuthorizedClientProvider tokenExchangeAuthorizedClientProvider =
-				new TokenExchangeOAuth2AuthorizedClientProvider();
-		tokenExchangeAuthorizedClientProvider.setActorTokenResolver(actorTokenResolver);
-
-		return tokenExchangeAuthorizedClientProvider;
-	}
-
 	/**
 	 * Create a standalone {@link OAuth2AuthorizedClientManager} for resolving the actor token
 	 * using {@code client_credentials}.
 	 */
 	private static OAuth2AuthorizedClientManager tokenExchangeAuthorizedClientManager(
-			ClientRegistrationRepository clientRegistrationRepository,
-			OAuth2AuthorizedClientService authorizedClientService) {
+		ClientRegistrationRepository clientRegistrationRepository,
+		OAuth2AuthorizedClientService authorizedClientService) {
 
 		// @formatter:off
 		OAuth2AuthorizedClientProvider authorizedClientProvider =
@@ -86,7 +69,7 @@ public class TokenExchangeConfig {
 	 * Create a {@code Function} to resolve a token from the current principal.
 	 */
 	private static Function<OAuth2AuthorizationContext, OAuth2Token> createTokenResolver(
-			OAuth2AuthorizedClientManager authorizedClientManager, String clientRegistrationId) {
+		OAuth2AuthorizedClientManager authorizedClientManager, String clientRegistrationId) {
 
 		return (context) -> {
 			// Do not provide an actor token for impersonation use case
@@ -106,6 +89,23 @@ public class TokenExchangeConfig {
 
 			return authorizedClient.getAccessToken();
 		};
+	}
+
+	@Bean
+	public OAuth2AuthorizedClientProvider tokenExchange(
+		ClientRegistrationRepository clientRegistrationRepository,
+		OAuth2AuthorizedClientService authorizedClientService) {
+
+		OAuth2AuthorizedClientManager authorizedClientManager = tokenExchangeAuthorizedClientManager(
+			clientRegistrationRepository, authorizedClientService);
+		Function<OAuth2AuthorizationContext, OAuth2Token> actorTokenResolver = createTokenResolver(
+			authorizedClientManager, ACTOR_TOKEN_CLIENT_REGISTRATION_ID);
+
+		TokenExchangeOAuth2AuthorizedClientProvider tokenExchangeAuthorizedClientProvider =
+			new TokenExchangeOAuth2AuthorizedClientProvider();
+		tokenExchangeAuthorizedClientProvider.setActorTokenResolver(actorTokenResolver);
+
+		return tokenExchangeAuthorizedClientProvider;
 	}
 
 }

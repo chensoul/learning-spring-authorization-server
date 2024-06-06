@@ -43,24 +43,33 @@ public class AuthorizationConsentController {
 	private final OAuth2AuthorizationConsentService authorizationConsentService;
 
 	public AuthorizationConsentController(RegisteredClientRepository registeredClientRepository,
-			OAuth2AuthorizationConsentService authorizationConsentService) {
+										  OAuth2AuthorizationConsentService authorizationConsentService) {
 		this.registeredClientRepository = registeredClientRepository;
 		this.authorizationConsentService = authorizationConsentService;
 	}
 
+	private static Set<ScopeWithDescription> withDescription(Set<String> scopes) {
+		Set<ScopeWithDescription> scopeWithDescriptions = new HashSet<>();
+		for (String scope : scopes) {
+			scopeWithDescriptions.add(new ScopeWithDescription(scope));
+
+		}
+		return scopeWithDescriptions;
+	}
+
 	@GetMapping(value = "/oauth2/consent")
 	public String consent(Principal principal, Model model,
-			@RequestParam(OAuth2ParameterNames.CLIENT_ID) String clientId,
-			@RequestParam(OAuth2ParameterNames.SCOPE) String scope,
-			@RequestParam(OAuth2ParameterNames.STATE) String state,
-			@RequestParam(name = OAuth2ParameterNames.USER_CODE, required = false) String userCode) {
+						  @RequestParam(OAuth2ParameterNames.CLIENT_ID) String clientId,
+						  @RequestParam(OAuth2ParameterNames.SCOPE) String scope,
+						  @RequestParam(OAuth2ParameterNames.STATE) String state,
+						  @RequestParam(name = OAuth2ParameterNames.USER_CODE, required = false) String userCode) {
 
 		// Remove scopes that were already approved
 		Set<String> scopesToApprove = new HashSet<>();
 		Set<String> previouslyApprovedScopes = new HashSet<>();
 		RegisteredClient registeredClient = this.registeredClientRepository.findByClientId(clientId);
 		OAuth2AuthorizationConsent currentAuthorizationConsent =
-				this.authorizationConsentService.findById(registeredClient.getId(), principal.getName());
+			this.authorizationConsentService.findById(registeredClient.getId(), principal.getName());
 		Set<String> authorizedScopes;
 		if (currentAuthorizationConsent != null) {
 			authorizedScopes = currentAuthorizationConsent.getScopes();
@@ -93,38 +102,30 @@ public class AuthorizationConsentController {
 		return "consent";
 	}
 
-	private static Set<ScopeWithDescription> withDescription(Set<String> scopes) {
-		Set<ScopeWithDescription> scopeWithDescriptions = new HashSet<>();
-		for (String scope : scopes) {
-			scopeWithDescriptions.add(new ScopeWithDescription(scope));
-
-		}
-		return scopeWithDescriptions;
-	}
-
 	public static class ScopeWithDescription {
 		private static final String DEFAULT_DESCRIPTION = "UNKNOWN SCOPE - We cannot provide information about this permission, use caution when granting this.";
 		private static final Map<String, String> scopeDescriptions = new HashMap<>();
+
 		static {
 			scopeDescriptions.put(
-					OidcScopes.PROFILE,
-					"This application will be able to read your profile information."
+				OidcScopes.PROFILE,
+				"This application will be able to read your profile information."
 			);
 			scopeDescriptions.put(
-					"message.read",
-					"This application will be able to read your message."
+				"message.read",
+				"This application will be able to read your message."
 			);
 			scopeDescriptions.put(
-					"message.write",
-					"This application will be able to add new messages. It will also be able to edit and delete existing messages."
+				"message.write",
+				"This application will be able to add new messages. It will also be able to edit and delete existing messages."
 			);
 			scopeDescriptions.put(
-					"user.read",
-					"This application will be able to read your user information."
+				"user.read",
+				"This application will be able to read your user information."
 			);
 			scopeDescriptions.put(
-					"other.scope",
-					"This is another scope example of a scope description."
+				"other.scope",
+				"This is another scope example of a scope description."
 			);
 		}
 

@@ -23,7 +23,7 @@ public class AuthorizationServerApplication {
 	 * /connect/register
 	 * /userinfo
 	 * /connect/logout
-	 *
+	 * <p>
 	 * For java based client registration configuration, it is very important to initialize this bean
 	 */
 	@Bean

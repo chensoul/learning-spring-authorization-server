@@ -16,6 +16,7 @@
 package sample.federation;
 
 // tag::imports[]
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -44,18 +45,18 @@ import org.springframework.security.oauth2.server.authorization.token.OAuth2Toke
 public final class FederatedIdentityIdTokenCustomizer implements OAuth2TokenCustomizer<JwtEncodingContext> {
 
 	private static final Set<String> ID_TOKEN_CLAIMS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
-			IdTokenClaimNames.ISS,
-			IdTokenClaimNames.SUB,
-			IdTokenClaimNames.AUD,
-			IdTokenClaimNames.EXP,
-			IdTokenClaimNames.IAT,
-			IdTokenClaimNames.AUTH_TIME,
-			IdTokenClaimNames.NONCE,
-			IdTokenClaimNames.ACR,
-			IdTokenClaimNames.AMR,
-			IdTokenClaimNames.AZP,
-			IdTokenClaimNames.AT_HASH,
-			IdTokenClaimNames.C_HASH
+		IdTokenClaimNames.ISS,
+		IdTokenClaimNames.SUB,
+		IdTokenClaimNames.AUD,
+		IdTokenClaimNames.EXP,
+		IdTokenClaimNames.IAT,
+		IdTokenClaimNames.AUTH_TIME,
+		IdTokenClaimNames.NONCE,
+		IdTokenClaimNames.ACR,
+		IdTokenClaimNames.AMR,
+		IdTokenClaimNames.AZP,
+		IdTokenClaimNames.AT_HASH,
+		IdTokenClaimNames.C_HASH
 	)));
 
 	@Override

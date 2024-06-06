@@ -46,10 +46,10 @@ public class AuthorizationController {
 	private final String userMessagesBaseUri;
 
 	public AuthorizationController(
-			@Qualifier("default-client-web-client") WebClient defaultClientWebClient,
-			@Qualifier("self-signed-demo-client-web-client") WebClient selfSignedDemoClientWebClient,
-			@Value("${messages.base-uri}") String messagesBaseUri,
-			@Value("${user-messages.base-uri}") String userMessagesBaseUri) {
+		@Qualifier("default-client-web-client") WebClient defaultClientWebClient,
+		@Qualifier("self-signed-demo-client-web-client") WebClient selfSignedDemoClientWebClient,
+		@Value("${messages.base-uri}") String messagesBaseUri,
+		@Value("${user-messages.base-uri}") String userMessagesBaseUri) {
 		this.defaultClientWebClient = defaultClientWebClient;
 		this.selfSignedDemoClientWebClient = selfSignedDemoClientWebClient;
 		this.messagesBaseUri = messagesBaseUri;
@@ -58,16 +58,16 @@ public class AuthorizationController {
 
 	@GetMapping(value = "/authorize", params = "grant_type=authorization_code")
 	public String authorizationCodeGrant(Model model,
-			@RegisteredOAuth2AuthorizedClient("messaging-client-authorization-code")
-					OAuth2AuthorizedClient authorizedClient) {
+										 @RegisteredOAuth2AuthorizedClient("messaging-client-authorization-code")
+										 OAuth2AuthorizedClient authorizedClient) {
 
 		String[] messages = this.defaultClientWebClient
-				.get()
-				.uri(this.messagesBaseUri)
-				.attributes(oauth2AuthorizedClient(authorizedClient))
-				.retrieve()
-				.bodyToMono(String[].class)
-				.block();
+			.get()
+			.uri(this.messagesBaseUri)
+			.attributes(oauth2AuthorizedClient(authorizedClient))
+			.retrieve()
+			.bodyToMono(String[].class)
+			.block();
 		model.addAttribute("messages", messages);
 
 		return "index";
@@ -79,10 +79,10 @@ public class AuthorizationController {
 		String errorCode = request.getParameter(OAuth2ParameterNames.ERROR);
 		if (StringUtils.hasText(errorCode)) {
 			model.addAttribute("error",
-					new OAuth2Error(
-							errorCode,
-							request.getParameter(OAuth2ParameterNames.ERROR_DESCRIPTION),
-							request.getParameter(OAuth2ParameterNames.ERROR_URI))
+				new OAuth2Error(
+					errorCode,
+					request.getParameter(OAuth2ParameterNames.ERROR_DESCRIPTION),
+					request.getParameter(OAuth2ParameterNames.ERROR_URI))
 			);
 		}
 
@@ -93,12 +93,12 @@ public class AuthorizationController {
 	public String clientCredentialsGrantUsingClientSecret(Model model) {
 
 		String[] messages = this.defaultClientWebClient
-				.get()
-				.uri(this.messagesBaseUri)
-				.attributes(clientRegistrationId("messaging-client-client-credentials"))
-				.retrieve()
-				.bodyToMono(String[].class)
-				.block();
+			.get()
+			.uri(this.messagesBaseUri)
+			.attributes(clientRegistrationId("messaging-client-client-credentials"))
+			.retrieve()
+			.bodyToMono(String[].class)
+			.block();
 		model.addAttribute("messages", messages);
 
 		return "index";
@@ -108,12 +108,12 @@ public class AuthorizationController {
 	public String clientCredentialsGrantUsingMutualTLS(Model model) {
 
 		String[] messages = this.defaultClientWebClient
-				.get()
-				.uri(this.messagesBaseUri)
-				.attributes(clientRegistrationId("mtls-demo-client-client-credentials"))
-				.retrieve()
-				.bodyToMono(String[].class)
-				.block();
+			.get()
+			.uri(this.messagesBaseUri)
+			.attributes(clientRegistrationId("mtls-demo-client-client-credentials"))
+			.retrieve()
+			.bodyToMono(String[].class)
+			.block();
 		model.addAttribute("messages", messages);
 
 		return "index";
@@ -123,12 +123,12 @@ public class AuthorizationController {
 	public String clientCredentialsGrantUsingSelfSignedMutualTLS(Model model) {
 
 		String[] messages = this.selfSignedDemoClientWebClient
-				.get()
-				.uri(this.messagesBaseUri)
-				.attributes(clientRegistrationId("mtls-self-signed-demo-client-client-credentials"))
-				.retrieve()
-				.bodyToMono(String[].class)
-				.block();
+			.get()
+			.uri(this.messagesBaseUri)
+			.attributes(clientRegistrationId("mtls-self-signed-demo-client-client-credentials"))
+			.retrieve()
+			.bodyToMono(String[].class)
+			.block();
 		model.addAttribute("messages", messages);
 
 		return "index";
@@ -138,12 +138,12 @@ public class AuthorizationController {
 	public String tokenExchangeGrantUsingDelegation(Model model) {
 
 		String[] messages = this.defaultClientWebClient
-				.get()
-				.uri(this.userMessagesBaseUri + "?use_case=delegation")
-				.attributes(clientRegistrationId("user-client-authorization-code"))
-				.retrieve()
-				.bodyToMono(String[].class)
-				.block();
+			.get()
+			.uri(this.userMessagesBaseUri + "?use_case=delegation")
+			.attributes(clientRegistrationId("user-client-authorization-code"))
+			.retrieve()
+			.bodyToMono(String[].class)
+			.block();
 		model.addAttribute("messages", messages);
 
 		return "index";
@@ -153,12 +153,12 @@ public class AuthorizationController {
 	public String tokenExchangeGrantUsingImpersonation(Model model) {
 
 		String[] messages = this.defaultClientWebClient
-				.get()
-				.uri(this.userMessagesBaseUri + "?use_case=impersonation")
-				.attributes(clientRegistrationId("user-client-authorization-code"))
-				.retrieve()
-				.bodyToMono(String[].class)
-				.block();
+			.get()
+			.uri(this.userMessagesBaseUri + "?use_case=impersonation")
+			.attributes(clientRegistrationId("user-client-authorization-code"))
+			.retrieve()
+			.bodyToMono(String[].class)
+			.block();
 		model.addAttribute("messages", messages);
 
 		return "index";

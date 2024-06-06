@@ -45,7 +45,7 @@ public final class OAuth2DeviceAccessTokenResponseClient implements OAuth2Access
 
 	public OAuth2DeviceAccessTokenResponseClient() {
 		RestTemplate restTemplate = new RestTemplate(Arrays.asList(new FormHttpMessageConverter(),
-				new OAuth2AccessTokenResponseHttpMessageConverter()));
+			new OAuth2AccessTokenResponseHttpMessageConverter()));
 		restTemplate.setErrorHandler(new OAuth2ErrorResponseErrorHandler());
 		this.restOperations = restTemplate;
 	}
@@ -90,8 +90,8 @@ public final class OAuth2DeviceAccessTokenResponseClient implements OAuth2Access
 			return this.restOperations.exchange(requestEntity, OAuth2AccessTokenResponse.class).getBody();
 		} catch (RestClientException ex) {
 			OAuth2Error oauth2Error = new OAuth2Error("invalid_token_response",
-					"An error occurred while attempting to retrieve the OAuth 2.0 Access Token Response: "
-							+ ex.getMessage(), null);
+				"An error occurred while attempting to retrieve the OAuth 2.0 Access Token Response: "
+				+ ex.getMessage(), null);
 			throw new OAuth2AuthorizationException(oauth2Error, ex);
 		}
 	}

@@ -18,61 +18,62 @@ import org.springframework.stereotype.Component;
 @Component
 public class AuthSuccessHandler implements AuthenticationSuccessHandler {
 
-    @Autowired
-    private OAuth2AuthorizedClientService authorizedClientService;
-    @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-        var accessToken = getAccessToken(authentication);
-        String username;
-        String imageUrl;
-        String name;
-        String redirectUrl = "";
-        if (((OAuth2AuthenticationToken) authentication).getAuthorizedClientRegistrationId().equals("github")) {
-            var principal = (DefaultOAuth2User)authentication.getPrincipal();
-            var attributes = principal.getAttributes();
-            name = attributes.get("name").toString();
-            username = attributes.get("login").toString();
-            imageUrl = attributes.get("avatar_url").toString();
-            redirectUrl = String.format(
-                    "http://localhost:4200/?access_token=%s&name=%s&username=%s&image_url=%s&avatar_url=%s",
-                    accessToken.getTokenValue(),
-                    name, username, imageUrl, imageUrl
-                    );
+	@Autowired
+	private OAuth2AuthorizedClientService authorizedClientService;
 
-        } else if (((OAuth2AuthenticationToken) authentication).getAuthorizedClientRegistrationId().equals("google")){
-            var principal = (DefaultOAuth2User)authentication.getPrincipal();
-            var attributes = principal.getAttributes();
-            name = attributes.get("name").toString();
-            username = attributes.get("email").toString().split("@")[0];
-            imageUrl = attributes.get("picture").toString();
-            redirectUrl = String.format(
-                    "http://localhost:4200/?access_token=%s&name=%s&username=%s&image_url=%s&avatar_url=%s",
-                    accessToken.getTokenValue(),
-                    name, username, imageUrl, imageUrl
-            );
-        }
-        response.sendRedirect(redirectUrl);
-    }
+	@Override
+	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
+		var accessToken = getAccessToken(authentication);
+		String username;
+		String imageUrl;
+		String name;
+		String redirectUrl = "";
+		if (((OAuth2AuthenticationToken) authentication).getAuthorizedClientRegistrationId().equals("github")) {
+			var principal = (DefaultOAuth2User) authentication.getPrincipal();
+			var attributes = principal.getAttributes();
+			name = attributes.get("name").toString();
+			username = attributes.get("login").toString();
+			imageUrl = attributes.get("avatar_url").toString();
+			redirectUrl = String.format(
+				"http://localhost:4200/?access_token=%s&name=%s&username=%s&image_url=%s&avatar_url=%s",
+				accessToken.getTokenValue(),
+				name, username, imageUrl, imageUrl
+			);
 
-    public OAuth2AccessToken getAccessToken (Authentication authentication) {
-        var authorizedClient = this.getAuthorizedClient(authentication);
-        if (authorizedClient != null) {
-            OAuth2AccessToken accessToken = authorizedClient.getAccessToken();
-            if (accessToken != null) {
-                return accessToken;
-            }
-        }
-        return null;
-    }
+		} else if (((OAuth2AuthenticationToken) authentication).getAuthorizedClientRegistrationId().equals("google")) {
+			var principal = (DefaultOAuth2User) authentication.getPrincipal();
+			var attributes = principal.getAttributes();
+			name = attributes.get("name").toString();
+			username = attributes.get("email").toString().split("@")[0];
+			imageUrl = attributes.get("picture").toString();
+			redirectUrl = String.format(
+				"http://localhost:4200/?access_token=%s&name=%s&username=%s&image_url=%s&avatar_url=%s",
+				accessToken.getTokenValue(),
+				name, username, imageUrl, imageUrl
+			);
+		}
+		response.sendRedirect(redirectUrl);
+	}
 
-    private OAuth2AuthorizedClient getAuthorizedClient(Authentication authentication) {
-        if (authentication instanceof OAuth2AuthenticationToken) {
-            OAuth2AuthenticationToken oauthToken = (OAuth2AuthenticationToken) authentication;
-            String clientRegistrationId = oauthToken.getAuthorizedClientRegistrationId();
-            String principalName = oauthToken.getName();
-            return authorizedClientService
-                    .loadAuthorizedClient(clientRegistrationId, principalName);
-        }
-        return null;
-    }
+	public OAuth2AccessToken getAccessToken(Authentication authentication) {
+		var authorizedClient = this.getAuthorizedClient(authentication);
+		if (authorizedClient != null) {
+			OAuth2AccessToken accessToken = authorizedClient.getAccessToken();
+			if (accessToken != null) {
+				return accessToken;
+			}
+		}
+		return null;
+	}
+
+	private OAuth2AuthorizedClient getAuthorizedClient(Authentication authentication) {
+		if (authentication instanceof OAuth2AuthenticationToken) {
+			OAuth2AuthenticationToken oauthToken = (OAuth2AuthenticationToken) authentication;
+			String clientRegistrationId = oauthToken.getAuthorizedClientRegistrationId();
+			String principalName = oauthToken.getName();
+			return authorizedClientService
+				.loadAuthorizedClient(clientRegistrationId, principalName);
+		}
+		return null;
+	}
 }

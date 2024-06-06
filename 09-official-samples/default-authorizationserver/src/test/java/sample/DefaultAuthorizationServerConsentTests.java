@@ -52,22 +52,19 @@ import static org.mockito.Mockito.when;
 @AutoConfigureMockMvc
 public class DefaultAuthorizationServerConsentTests {
 
+	private final String redirectUri = "http://127.0.0.1/login/oauth2/code/messaging-client-oidc";
+	private final String authorizationRequestUri = UriComponentsBuilder
+		.fromPath("/oauth2/authorize")
+		.queryParam("response_type", "code")
+		.queryParam("client_id", "messaging-client")
+		.queryParam("scope", "openid message.read message.write")
+		.queryParam("state", "state")
+		.queryParam("redirect_uri", this.redirectUri)
+		.toUriString();
 	@Autowired
 	private WebClient webClient;
-
 	@MockBean
 	private OAuth2AuthorizationConsentService authorizationConsentService;
-
-	private final String redirectUri = "http://127.0.0.1/login/oauth2/code/messaging-client-oidc";
-
-	private final String authorizationRequestUri = UriComponentsBuilder
-			.fromPath("/oauth2/authorize")
-			.queryParam("response_type", "code")
-			.queryParam("client_id", "messaging-client")
-			.queryParam("scope", "openid message.read message.write")
-			.queryParam("state", "state")
-			.queryParam("redirect_uri", this.redirectUri)
-			.toUriString();
 
 	@BeforeEach
 	public void setUp() {
@@ -85,7 +82,7 @@ public class DefaultAuthorizationServerConsentTests {
 
 		List<HtmlCheckBoxInput> scopes = new ArrayList<>();
 		consentPage.querySelectorAll("input[name='scope']").forEach(scope ->
-				scopes.add((HtmlCheckBoxInput) scope));
+			scopes.add((HtmlCheckBoxInput) scope));
 		for (HtmlCheckBoxInput scope : scopes) {
 			scope.click();
 		}

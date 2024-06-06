@@ -49,16 +49,16 @@ public class RestTemplateConfig {
 			SslBundle sslBundle = sslBundles.getBundle("demo-client");
 			final SSLContext sslContext = sslBundle.createSslContext();
 			final SSLConnectionSocketFactory sslConnectionSocketFactory =
-					new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE);
+				new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE);
 			final Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
-					.register("http", PlainConnectionSocketFactory.getSocketFactory())
-					.register("https", sslConnectionSocketFactory)
-					.build();
+				.register("http", PlainConnectionSocketFactory.getSocketFactory())
+				.register("https", sslConnectionSocketFactory)
+				.build();
 			final BasicHttpClientConnectionManager connectionManager =
-					new BasicHttpClientConnectionManager(socketFactoryRegistry);
+				new BasicHttpClientConnectionManager(socketFactoryRegistry);
 			final CloseableHttpClient httpClient = HttpClients.custom()
-					.setConnectionManager(connectionManager)
-					.build();
+				.setConnectionManager(connectionManager)
+				.build();
 			return new HttpComponentsClientHttpRequestFactory(httpClient);
 		};
 	}
@@ -69,15 +69,15 @@ public class RestTemplateConfig {
 			SslBundle sslBundle = sslBundles.getBundle("self-signed-demo-client");
 			final SSLContext sslContext = sslBundle.createSslContext();
 			final SSLConnectionSocketFactory sslConnectionSocketFactory =
-					new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE);
+				new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE);
 			final Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
-					.register("https", sslConnectionSocketFactory)
-					.build();
+				.register("https", sslConnectionSocketFactory)
+				.build();
 			final BasicHttpClientConnectionManager connectionManager =
-					new BasicHttpClientConnectionManager(socketFactoryRegistry);
+				new BasicHttpClientConnectionManager(socketFactoryRegistry);
 			final CloseableHttpClient httpClient = HttpClients.custom()
-					.setConnectionManager(connectionManager)
-					.build();
+				.setConnectionManager(connectionManager)
+				.build();
 			return new HttpComponentsClientHttpRequestFactory(httpClient);
 		};
 	}

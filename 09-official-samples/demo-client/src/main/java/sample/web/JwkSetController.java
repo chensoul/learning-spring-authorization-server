@@ -44,11 +44,6 @@ public class JwkSetController {
 		this.jwkSet = initJwkSet(sslBundles);
 	}
 
-	@GetMapping("/jwks")
-	public Map<String, Object> getJwkSet() {
-		return this.jwkSet.toJSONObject();
-	}
-
 	private static JWKSet initJwkSet(SslBundles sslBundles) throws Exception {
 		SslBundle sslBundle = sslBundles.getBundle("self-signed-demo-client");
 		KeyStore keyStore = sslBundle.getStores().getKeyStore();
@@ -57,12 +52,17 @@ public class JwkSetController {
 		Certificate certificate = keyStore.getCertificate(alias);
 
 		RSAKey rsaKey = new RSAKey.Builder((RSAPublicKey) certificate.getPublicKey())
-				.keyUse(KeyUse.SIGNATURE)
-				.keyID(UUID.randomUUID().toString())
-				.x509CertChain(Collections.singletonList(Base64.encode(certificate.getEncoded())))
-				.build();
+			.keyUse(KeyUse.SIGNATURE)
+			.keyID(UUID.randomUUID().toString())
+			.x509CertChain(Collections.singletonList(Base64.encode(certificate.getEncoded())))
+			.build();
 
 		return new JWKSet(rsaKey);
+	}
+
+	@GetMapping("/jwks")
+	public Map<String, Object> getJwkSet() {
+		return this.jwkSet.toJSONObject();
 	}
 
 }

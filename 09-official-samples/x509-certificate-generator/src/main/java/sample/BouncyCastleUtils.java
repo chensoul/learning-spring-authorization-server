@@ -45,10 +45,10 @@ import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
  * @since 1.3
  */
 final class BouncyCastleUtils {
+	static final String BC_PROVIDER = "BC";
 	private static final String SHA256_RSA_SIGNATURE_ALGORITHM = "SHA256withRSA";
 	private static final Date DEFAULT_START_DATE;
 	private static final Date DEFAULT_END_DATE;
-	static final String BC_PROVIDER = "BC";
 
 	static {
 		Security.addProvider(new BouncyCastleProvider());
@@ -81,23 +81,23 @@ final class BouncyCastleUtils {
 		BigInteger serialNum = new BigInteger(Long.toString(new SecureRandom().nextLong()));
 
 		X509v3CertificateBuilder certBuilder = new JcaX509v3CertificateBuilder(
-				subject,
-				serialNum,
-				DEFAULT_START_DATE,
-				DEFAULT_END_DATE,
-				subject,
-				keyPair.getPublic());
+			subject,
+			serialNum,
+			DEFAULT_START_DATE,
+			DEFAULT_END_DATE,
+			subject,
+			keyPair.getPublic());
 
 		// Add Extensions
 		JcaX509ExtensionUtils extensionUtils = new JcaX509ExtensionUtils();
 		certBuilder
-				// A BasicConstraints to mark root certificate as CA certificate
-				.addExtension(Extension.basicConstraints, true, new BasicConstraints(true))
-				.addExtension(Extension.subjectKeyIdentifier, false,
-						extensionUtils.createSubjectKeyIdentifier(keyPair.getPublic()));
+			// A BasicConstraints to mark root certificate as CA certificate
+			.addExtension(Extension.basicConstraints, true, new BasicConstraints(true))
+			.addExtension(Extension.subjectKeyIdentifier, false,
+				extensionUtils.createSubjectKeyIdentifier(keyPair.getPublic()));
 
 		ContentSigner signer = new JcaContentSignerBuilder(SHA256_RSA_SIGNATURE_ALGORITHM)
-				.setProvider(BC_PROVIDER).build(keyPair.getPrivate());
+			.setProvider(BC_PROVIDER).build(keyPair.getPrivate());
 
 		JcaX509CertificateConverter converter = new JcaX509CertificateConverter().setProvider(BC_PROVIDER);
 
@@ -105,37 +105,37 @@ final class BouncyCastleUtils {
 	}
 
 	static X509Certificate createCACertificate(X509Certificate signerCert, PrivateKey signerKey,
-			PublicKey certKey, String distinguishedName) throws Exception {
+											   PublicKey certKey, String distinguishedName) throws Exception {
 
 		X500Principal subject = new X500Principal(distinguishedName);
 		BigInteger serialNum = new BigInteger(Long.toString(new SecureRandom().nextLong()));
 
 		X509v3CertificateBuilder certBuilder = new JcaX509v3CertificateBuilder(
-				signerCert.getSubjectX500Principal(),
-				serialNum,
-				DEFAULT_START_DATE,
-				DEFAULT_END_DATE,
-				subject,
-				certKey);
+			signerCert.getSubjectX500Principal(),
+			serialNum,
+			DEFAULT_START_DATE,
+			DEFAULT_END_DATE,
+			subject,
+			certKey);
 
 		// Add Extensions
 		JcaX509ExtensionUtils extensionUtils = new JcaX509ExtensionUtils();
 		certBuilder
-				// A BasicConstraints to mark as CA certificate and how many CA certificates can follow it in the chain
-				// (with 0 meaning the chain ends with the next certificate in the chain).
-				.addExtension(Extension.basicConstraints, true, new BasicConstraints(0))
-				// KeyUsage specifies what the public key in the certificate can be used for.
-				// In this case, it can be used for signing other certificates and/or
-				// signing Certificate Revocation Lists (CRLs).
-				.addExtension(Extension.keyUsage, true,
-						new KeyUsage(KeyUsage.keyCertSign | KeyUsage.cRLSign))
-				.addExtension(Extension.authorityKeyIdentifier, false,
-						extensionUtils.createAuthorityKeyIdentifier(signerCert))
-				.addExtension(Extension.subjectKeyIdentifier, false,
-						extensionUtils.createSubjectKeyIdentifier(certKey));
+			// A BasicConstraints to mark as CA certificate and how many CA certificates can follow it in the chain
+			// (with 0 meaning the chain ends with the next certificate in the chain).
+			.addExtension(Extension.basicConstraints, true, new BasicConstraints(0))
+			// KeyUsage specifies what the public key in the certificate can be used for.
+			// In this case, it can be used for signing other certificates and/or
+			// signing Certificate Revocation Lists (CRLs).
+			.addExtension(Extension.keyUsage, true,
+				new KeyUsage(KeyUsage.keyCertSign | KeyUsage.cRLSign))
+			.addExtension(Extension.authorityKeyIdentifier, false,
+				extensionUtils.createAuthorityKeyIdentifier(signerCert))
+			.addExtension(Extension.subjectKeyIdentifier, false,
+				extensionUtils.createSubjectKeyIdentifier(certKey));
 
 		ContentSigner signer = new JcaContentSignerBuilder(SHA256_RSA_SIGNATURE_ALGORITHM)
-				.setProvider(BC_PROVIDER).build(signerKey);
+			.setProvider(BC_PROVIDER).build(signerKey);
 
 		JcaX509CertificateConverter converter = new JcaX509CertificateConverter().setProvider(BC_PROVIDER);
 
@@ -143,31 +143,31 @@ final class BouncyCastleUtils {
 	}
 
 	static X509Certificate createEndEntityCertificate(X509Certificate signerCert, PrivateKey signerKey,
-			PublicKey certKey, String distinguishedName) throws Exception {
+													  PublicKey certKey, String distinguishedName) throws Exception {
 
 		X500Principal subject = new X500Principal(distinguishedName);
 		BigInteger serialNum = new BigInteger(Long.toString(new SecureRandom().nextLong()));
 
-		X509v3CertificateBuilder  certBuilder = new JcaX509v3CertificateBuilder(
-				signerCert.getSubjectX500Principal(),
-				serialNum,
-				DEFAULT_START_DATE,
-				DEFAULT_END_DATE,
-				subject,
-				certKey);
+		X509v3CertificateBuilder certBuilder = new JcaX509v3CertificateBuilder(
+			signerCert.getSubjectX500Principal(),
+			serialNum,
+			DEFAULT_START_DATE,
+			DEFAULT_END_DATE,
+			subject,
+			certKey);
 
 		JcaX509ExtensionUtils extensionUtils = new JcaX509ExtensionUtils();
 		certBuilder
-				.addExtension(Extension.basicConstraints, true, new BasicConstraints(false))
-				.addExtension(Extension.keyUsage, true,
-						new KeyUsage(KeyUsage.digitalSignature))
-				.addExtension(Extension.authorityKeyIdentifier, false,
-						extensionUtils.createAuthorityKeyIdentifier(signerCert))
-				.addExtension(Extension.subjectKeyIdentifier, false,
-						extensionUtils.createSubjectKeyIdentifier(certKey));
+			.addExtension(Extension.basicConstraints, true, new BasicConstraints(false))
+			.addExtension(Extension.keyUsage, true,
+				new KeyUsage(KeyUsage.digitalSignature))
+			.addExtension(Extension.authorityKeyIdentifier, false,
+				extensionUtils.createAuthorityKeyIdentifier(signerCert))
+			.addExtension(Extension.subjectKeyIdentifier, false,
+				extensionUtils.createSubjectKeyIdentifier(certKey));
 
 		ContentSigner signer = new JcaContentSignerBuilder(SHA256_RSA_SIGNATURE_ALGORITHM)
-				.setProvider(BC_PROVIDER).build(signerKey);
+			.setProvider(BC_PROVIDER).build(signerKey);
 
 		JcaX509CertificateConverter converter = new JcaX509CertificateConverter().setProvider(BC_PROVIDER);
 
