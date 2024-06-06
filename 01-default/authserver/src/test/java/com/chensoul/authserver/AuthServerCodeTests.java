@@ -22,7 +22,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
-public class AuthorizationServerCodeTests {
+public class AuthServerCodeTests {
 	private static final String REDIRECT_URI = "http://127.0.0.1:8080/login/oauth2/code/oidc-client";
 
 	private static final String AUTHORIZATION_REQUEST = UriComponentsBuilder

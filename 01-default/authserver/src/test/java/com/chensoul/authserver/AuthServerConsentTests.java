@@ -27,7 +27,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
-public class AuthorizationServerConsentTests {
+public class AuthServerConsentTests {
 
 	private final String redirectUri = "http://127.0.0.1/login/oauth2/code/oidc-client";
 	private final String authorizationRequestUri = UriComponentsBuilder.fromPath("/oauth2/authorize")
